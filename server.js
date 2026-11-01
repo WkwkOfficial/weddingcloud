@@ -1,9 +1,12 @@
 const express = require('express');
 const multer = require('multer');
 const { createClient } = require('@supabase/supabase-js');
+const cors = require('cors'); // 1. TAMBAHKAN INI
 require('dotenv').config();
 
 const app = express();
+
+app.use(cors()); // 2. TAMBAHKAN INI (Wajib di atas app.use yang lain)
 app.use(express.json());
 
 // Konfigurasi Supabase Client
@@ -64,14 +67,6 @@ app.post('/api/galleries', upload.single('file'), async (req, res) => {
   }
 });
 
-// Jalankan server lokal jika bukan di environment production (Vercel)
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server Backend berjalan di http://localhost:${PORT}`);
-  });
-}
-
 // Endpoint untuk mengambil semua daftar foto di galeri
 app.get('/api/galleries', async (req, res) => {
   try {
@@ -94,6 +89,14 @@ app.get('/api/galleries', async (req, res) => {
     res.status(500).json({ error: 'Gagal mengambil data galeri' });
   }
 });
+
+// Jalankan server lokal jika bukan di environment production (Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server Backend berjalan di http://localhost:${PORT}`);
+  });
+}
 
 // WAJIB ADA AGAR BISA DI-DEPLOY KE VERCEL
 module.exports = app;
