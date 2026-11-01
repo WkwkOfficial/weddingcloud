@@ -72,5 +72,28 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Endpoint untuk mengambil semua daftar foto di galeri
+app.get('/api/galleries', async (req, res) => {
+  try {
+    // Ambil daftar file dari folder 'gallery' di Supabase
+    const { data: files, error } = await supabase.storage.from('galleries').list('gallery');
+    
+    if (error) throw error;
+
+    // Buat array berisi public URL dari masing-masing file
+    const imageUrls = files
+      .filter(file => file.name !== '.emptyFolderPlaceholder') // abaikan file kosong
+      .map(file => {
+        const { data: urlData } = supabase.storage.from('galleries').getPublicUrl(`gallery/${file.name}`);
+        return urlData.publicUrl;
+      });
+
+    res.status(200).json(imageUrls);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Gagal mengambil data galeri' });
+  }
+});
+
 // WAJIB ADA AGAR BISA DI-DEPLOY KE VERCEL
 module.exports = app;
